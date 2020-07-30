@@ -1,5 +1,6 @@
 import { Repository, EntityRepository } from 'typeorm';
 import {
+  Logger,
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -9,6 +10,8 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
+  private logger = new Logger('UserRepository');
+
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
     const { username, password } = authCredentialsDto;
 
@@ -21,8 +24,10 @@ export class UserRepository extends Repository<User> {
       await user.save();
     } catch (error) {
       if (error.code === '23505') {
+        this.logger.warn(`signUp() duplicate username: "${username}"`);
         throw new ConflictException('Username already exists');
       } else {
+        this.logger.error(`signUp() failed for: "${username}"`, error.stack);
         throw new InternalServerErrorException();
       }
     }

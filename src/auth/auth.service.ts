@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from './user.repository';
@@ -7,6 +7,7 @@ import { JwtPayload } from './jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger('AuthService');
   constructor(
     @InjectRepository(UserRepository)
     private userRepository: UserRepository,
@@ -25,6 +26,9 @@ export class AuthService {
     );
 
     if (!username) {
+      this.logger.warn(
+        `signIn() invalid credentials by: "${authCredentialsDto.username}"`,
+      );
       throw new UnauthorizedException('Invalid credentials');
     }
 

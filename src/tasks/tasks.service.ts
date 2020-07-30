@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskRepository } from './task.repository';
 import { Task } from './task.entity';
@@ -9,6 +9,7 @@ import { User } from '../auth/user.entity';
 
 @Injectable()
 export class TasksService {
+  private logger = new Logger('TasksService');
   constructor(
     @InjectRepository(TaskRepository)
     private taskRepository: TaskRepository,
@@ -23,6 +24,7 @@ export class TasksService {
       where: { id, userId: user.id },
     });
     if (!task) {
+      this.logger.warn(`getTaskById(${id}) by: "${user.username}" not found`);
       throw new NotFoundException(`Task with ID: ${id} not found`);
     }
     return task;
@@ -46,6 +48,7 @@ export class TasksService {
   async deleteTask(id: number, user: User): Promise<void> {
     const result = await this.taskRepository.delete({ id, userId: user.id });
     if (result.affected === 0) {
+      this.logger.warn(`deleteTask(${id}) by: "${user.username}" not found`);
       throw new NotFoundException(`Task with ID: ${id} not found`);
     }
   }
