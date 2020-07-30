@@ -1,2 +1,5 @@
+server:
+  origin: http://mvkitech-nestjs-taskmanagement-frontend.s3-website.ca-central-1.amazonaws.com/
+
 db:
   synchronize: false
